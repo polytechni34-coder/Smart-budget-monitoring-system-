@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Smart Budget Monitoring System</string>
+    <string name="navigation_home">Home</string>
+    <string name="navigation_expenses">Expenses</string>
+    <string name="navigation_add">Add</string>
+    <string name="navigation_peers">Peers</string>
+    <string name="navigation_profile">Profile</string>
+    <string name="navigation_analytics">Analytics</string>
+
+    <string-array name="filter_options">
+        <item>Week</item>
+        <item>Month</item>
+    </string-array>
+</resources>
