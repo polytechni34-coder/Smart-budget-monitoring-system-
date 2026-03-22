@@ -149,16 +149,18 @@ public class ProfileActivity extends AppCompatActivity {
                     startActivity(new Intent(this, ViewExpenseActivity.class));
                     finish();
                     return true;
-                //} else if (itemId == R.id.navigation_analytics) {
-                    //startActivity(new Intent(this, AnalyticsActivity.class));
-                    //finish();
-                    //return true;
-                } else if (itemId == R.id.navigation_peers) {
-                    startActivity(new Intent(this, PeerComparisonActivity.class));
+                } else if (itemId == R.id.navigation_add) {
+                    startActivity(new Intent(this, AddExpenseActivity.class));
                     finish();
                     return true;
+                } else if (itemId == R.id.navigation_analytics) {
+                    startActivity(new Intent(this, AnalyticsActivity.class));
+                    finish();
+                    return true;
+                } else if (itemId == R.id.navigation_profile) {
+                    return true;
                 }
-                return itemId == R.id.navigation_profile;
+                return false;
             });
         }
     }

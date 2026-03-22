@@ -87,12 +87,12 @@ public class ViewExpenseActivity extends AppCompatActivity {
                     return true;
                 } else if (itemId == R.id.navigation_expenses) {
                     return true;
-                //} else if (itemId == R.id.navigation_analytics) {
-                    //startActivity(new Intent(this, AnalyticsActivity.class));
-                    //finish();
-                    //return true;
-                } else if (itemId == R.id.navigation_peers) {
-                    startActivity(new Intent(this, PeerComparisonActivity.class));
+                } else if (itemId == R.id.navigation_add) {
+                    startActivity(new Intent(this, AddExpenseActivity.class));
+                    finish();
+                    return true;
+                } else if (itemId == R.id.navigation_analytics) {
+                    startActivity(new Intent(this, AnalyticsActivity.class));
                     finish();
                     return true;
                 } else if (itemId == R.id.navigation_profile) {

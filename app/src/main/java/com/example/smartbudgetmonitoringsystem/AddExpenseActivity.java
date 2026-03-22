@@ -84,6 +84,9 @@ public class AddExpenseActivity extends AppCompatActivity {
             return;
         }
 
+        // Use Singleton instance
+        db = DatabaseHelper.getInstance(this);
+
         etName = findViewById(R.id.etExpenseName);
         tvCategory = findViewById(R.id.tvSelectedCategory);
         etAmount = findViewById(R.id.etExpenseAmount);
@@ -91,7 +94,6 @@ public class AddExpenseActivity extends AppCompatActivity {
         btnAddCategory = findViewById(R.id.btnAddCategory);
         btnSave = findViewById(R.id.btnSaveExpense);
         categoryBarLayout = findViewById(R.id.categoryBarLayout);
-        db = new DatabaseHelper(this);
 
         categoryList = new ArrayList<>(Arrays.asList(
                 "🍔 Food", "🚌 Transport", "🛒 Shopping", "🎬 Entertainment",
@@ -147,7 +149,6 @@ public class AddExpenseActivity extends AppCompatActivity {
             return;
         }
 
-        // Budget Check Logic
         double budgetLimit = 0;
         Cursor budgetCursor = db.getCurrentMonthBudget(userId);
         if (budgetCursor.moveToFirst()) {
@@ -155,19 +156,17 @@ public class AddExpenseActivity extends AppCompatActivity {
         }
         budgetCursor.close();
 
-        // VALIDATION: Check if budget has been set
         if (budgetLimit <= 0) {
             Toast.makeText(this, "Please set your budget before adding expenses.", Toast.LENGTH_LONG).show();
-            // Redirecting to Dashboard as budget setting is handled via dialog there in this app structure
             Intent intent = new Intent(this, DashboardActivity.class);
             intent.putExtra("OPEN_BUDGET_DIALOG", true);
             startActivity(intent);
+            finish();
             return;
         }
 
         double currentTotal = db.getCurrentMonthTotalExpenses(userId);
         double totalAfterAdd = currentTotal + amount;
-        
         if (expenseId != -1) {
             Cursor oldExp = db.getExpenseById(expenseId, userId);
             if (oldExp.moveToFirst()) {
@@ -183,7 +182,6 @@ public class AddExpenseActivity extends AppCompatActivity {
         }
 
         checkThresholds(totalAfterAdd, budgetLimit);
-
         saveToDatabase(name, amount, category, date);
     }
 
@@ -193,12 +191,10 @@ public class AddExpenseActivity extends AppCompatActivity {
             String msg = "You have used 100% of your monthly budget!";
             db.addNotification(userId, "Budget Exhausted", msg);
             sendSystemNotification("Budget Exhausted", msg, true);
-            Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
         } else if (percentage >= 75) {
             String msg = String.format(Locale.getDefault(), "You have reached %.1f%% of your monthly budget.", percentage);
             db.addNotification(userId, "Budget Warning", msg);
             sendSystemNotification("Budget Warning", msg, true);
-            Toast.makeText(this, "Warning: 75% budget reached!", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -221,7 +217,7 @@ public class AddExpenseActivity extends AppCompatActivity {
         try {
             notificationManager.notify((int) System.currentTimeMillis(), builder.build());
         } catch (SecurityException e) {
-            Toast.makeText(this, "Notification permission needed for budget alerts", Toast.LENGTH_SHORT).show();
+            // Permission catch
         }
     }
 
@@ -234,7 +230,9 @@ public class AddExpenseActivity extends AppCompatActivity {
             channel.setDescription(description);
             channel.setShowBadge(true);
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel);
+            }
         }
     }
 
@@ -247,20 +245,22 @@ public class AddExpenseActivity extends AppCompatActivity {
     }
 
     private void saveToDatabase(String name, double amount, String category, String date) {
+        boolean success;
         if (expenseId != -1) {
-            if (db.updateExpense(expenseId, userId, name, amount, category, date)) {
-                Toast.makeText(this, "Expense updated", Toast.LENGTH_SHORT).show();
-                finish();
-            } else {
-                Toast.makeText(this, "Failed to update expense", Toast.LENGTH_SHORT).show();
-            }
+            success = db.updateExpense(expenseId, userId, name, amount, category, date);
         } else {
-            if (db.addExpense(userId, name, amount, category, date)) {
-                Toast.makeText(this, "Expense added", Toast.LENGTH_SHORT).show();
-                finish();
-            } else {
-                Toast.makeText(this, "Failed to add expense", Toast.LENGTH_SHORT).show();
-            }
+            success = db.addExpense(userId, name, amount, category, date);
+        }
+
+        if (success) {
+            Toast.makeText(this, expenseId != -1 ? "Expense updated" : "Expense added", Toast.LENGTH_SHORT).show();
+            // Start Dashboard activity and clear the stack to prevent app from "closing"
+            Intent intent = new Intent(this, DashboardActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finish();
+        } else {
+            Toast.makeText(this, "Failed to save expense", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -272,17 +272,21 @@ public class AddExpenseActivity extends AppCompatActivity {
                 int itemId = item.getItemId();
                 if (itemId == R.id.navigation_home) {
                     startActivity(new Intent(this, DashboardActivity.class));
+                    finish();
                     return true;
                 } else if (itemId == R.id.navigation_expenses) {
                     startActivity(new Intent(this, ViewExpenseActivity.class));
+                    finish();
                     return true;
                 } else if (itemId == R.id.navigation_add) {
                     return true;
                 } else if (itemId == R.id.navigation_analytics) {
                     startActivity(new Intent(this, AnalyticsActivity.class));
+                    finish();
                     return true;
                 } else if (itemId == R.id.navigation_profile) {
                     startActivity(new Intent(this, ProfileActivity.class));
+                    finish();
                     return true;
                 }
                 return false;

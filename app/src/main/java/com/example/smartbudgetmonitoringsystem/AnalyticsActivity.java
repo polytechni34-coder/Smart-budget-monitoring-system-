@@ -51,7 +51,7 @@ public class AnalyticsActivity extends AppCompatActivity {
         pieChart = findViewById(R.id.pieChart);
         lineChart = findViewById(R.id.lineChart);
 
-        db = new DatabaseHelper(this);
+        db = DatabaseHelper.getInstance(this);
 
         spinnerFilter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -70,26 +70,22 @@ public class AnalyticsActivity extends AppCompatActivity {
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         if (bottomNavigationView != null) {
-           // bottomNavigationView.setSelectedItemId(R.id.navigation_analytics);
+            bottomNavigationView.setSelectedItemId(R.id.navigation_analytics);
             bottomNavigationView.setOnItemSelectedListener(item -> {
                 int itemId = item.getItemId();
                 if (itemId == R.id.navigation_home) {
                     startActivity(new Intent(this, DashboardActivity.class));
-                    finish();
                     return true;
                 } else if (itemId == R.id.navigation_expenses) {
                     startActivity(new Intent(this, ViewExpenseActivity.class));
-                    finish();
                     return true;
-               // } else if (itemId == R.id.navigation_analytics) {
-                    //return true;
-                } else if (itemId == R.id.navigation_peers) {
-                    startActivity(new Intent(this, PeerComparisonActivity.class));
-                    finish();
+                } else if (itemId == R.id.navigation_add) {
+                    startActivity(new Intent(this, AddExpenseActivity.class));
+                    return true;
+                } else if (itemId == R.id.navigation_analytics) {
                     return true;
                 } else if (itemId == R.id.navigation_profile) {
                     startActivity(new Intent(this, ProfileActivity.class));
-                    finish();
                     return true;
                 }
                 return false;

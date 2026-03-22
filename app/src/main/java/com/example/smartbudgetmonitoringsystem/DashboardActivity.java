@@ -70,7 +70,8 @@ public class DashboardActivity extends AppCompatActivity {
             return;
         }
 
-        db = new DatabaseHelper(this);
+        // Use Singleton
+        db = DatabaseHelper.getInstance(this);
 
         pieChart = findViewById(R.id.pieChart);
         tvBudgetAmount = findViewById(R.id.tv_total_budget_amount);
@@ -130,19 +131,15 @@ public class DashboardActivity extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.navigation_expenses) {
                 startActivity(new Intent(this, ViewExpenseActivity.class));
-                finish();
+                return true;
+            } else if (itemId == R.id.navigation_add) {
+                startActivity(new Intent(this, AddExpenseActivity.class));
                 return true;
             } else if (itemId == R.id.navigation_analytics) {
                 startActivity(new Intent(this, AnalyticsActivity.class));
-                finish();
-                return true;
-            } else if (itemId == R.id.navigation_peers) {
-                startActivity(new Intent(this, PeerComparisonActivity.class));
-                finish();
                 return true;
             } else if (itemId == R.id.navigation_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
-                finish();
                 return true;
             }
             return false;
@@ -164,6 +161,9 @@ public class DashboardActivity extends AppCompatActivity {
         super.onResume();
         loadDashboardData();
         updateCategoryBadge();
+        // Ensure home is selected when returning
+        BottomNavigationView bnv = findViewById(R.id.bottom_navigation);
+        if (bnv != null) bnv.setSelectedItemId(R.id.navigation_home);
     }
 
     private void updateCategoryBadge() {
